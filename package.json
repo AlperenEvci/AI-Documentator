@@ -1,7 +1,7 @@
 {
-  "name": "langtest",
+  "name": "ai-api-doc-gen",
   "version": "1.0.0",
-  "description": "LangGraph TypeScript playground",
+  "description": "AI API Documentation Generator",
   "type": "module",
   "main": "index.js",
   "scripts": {
