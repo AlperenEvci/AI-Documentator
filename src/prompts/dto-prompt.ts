@@ -64,6 +64,11 @@ Rules:
 - Use class-validator decorators: @IsString, @IsEmail, @IsNumber, @IsBoolean, @IsOptional, @IsArray, @ValidateNested, @IsEnum, @IsUUID, @IsDate, @Min, @Max, @MinLength, @MaxLength, @IsNotEmpty
 - Use class-transformer decorators: @Expose() on every field, @Type(() => NestedDto) for nested objects, @Exclude() on sensitive fields
 - Every class must have @Exclude() at class level for response DTOs (whitelist approach)
+- Use @ApiProperty() from @nestjs/swagger on every non-optional field with: type, description, example
+- Use @ApiPropertyOptional() on every optional field with: type, description, example
+- For nested objects use @ApiProperty({ type: () => NestedDto })
+- For arrays use @ApiProperty({ type: () => [ItemDto] })
+- For enums use @ApiProperty({ enum: MyEnum, enumName: 'MyEnum' })
 - Do NOT include sensitive fields in response DTOs: passwordHash, password, secret, token (unless it's an auth endpoint returning a token)
 - Infer field names and types strictly from Prisma schema. If schema is unavailable, use method name + HTTP method semantics.
 - If service uses Prisma include/select, reflect those relations in response DTO with nested DTOs

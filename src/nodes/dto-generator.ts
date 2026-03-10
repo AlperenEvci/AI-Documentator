@@ -2,6 +2,7 @@ import { ChatGoogle } from "@langchain/google";
 import type { ParsedEndpoint } from "../types/endpoint.js";
 import { buildDtoPrompt } from "../prompts/dto-prompt.js";
 import { GeneratedDtosSchema } from "../schemas/endpoint-schema.js";
+import { withRetry } from "../utils/retry.js";
 
 function normalizeCodeFence(text: string): string {
   return text
@@ -22,17 +23,19 @@ export async function generateDtos(
     `  [DTO] ${endpoint.httpMethod} ${endpoint.routePath}`
   );
 
-  const response = await model.invoke(prompt);
-  const raw = normalizeCodeFence(String(response.content));
+  return withRetry(
+    `DTO ${endpoint.httpMethod} ${endpoint.routePath}`,
+    async () => {
+      const response = await model.invoke(prompt);
+      const raw = normalizeCodeFence(String(response.content));
 
-  let parsed: { requestDtoCode: string | null; responseDtoCode: string };
-  try {
-    parsed = GeneratedDtosSchema.parse(JSON.parse(raw));
-  } catch (err) {
-    throw new Error(
-      `DTO generation failed for ${endpoint.methodName}: invalid JSON response. Raw: ${raw.slice(0, 200)}`
-    );
-  }
-
-  return parsed;
+      try {
+        return GeneratedDtosSchema.parse(JSON.parse(raw));
+      } catch {
+        throw new Error(
+          `Invalid JSON response for ${endpoint.methodName}. Raw: ${raw.slice(0, 200)}`
+        );
+      }
+    }
+  );
 }
